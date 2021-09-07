@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.xjfd.ssm.dao.HisImportantMeasureMapper">
+
+	<select id="getHisImportant" resultType="cn.xjfd.ssm.pojo.HisImportantData" parameterType="cn.xjfd.ssm.pojo.QueryPeriod">
+		SELECT
+			DATE_FORMAT(h.savetime, '%Y-%m-%d %k:%i:%s') AS savetime,
+			ROUND(h.${columnname}, 3) AS cal0
+		FROM
+			hiswgimptinfo_#{year} h
+		WHERE
+			h.id = #{id}
+		AND h.savetime >= #{startTime}
+		<![CDATA[ AND h.savetime <= #{endTime} ]]>
+		
+		GROUP BY
+			h.savetime
+	</select>
+	
+</mapper>

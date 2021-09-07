@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.xjfd.ssm.dao.ReportMonthMapper">
+
+	<select id="getReportMonth" resultType="cn.xjfd.ssm.pojo.ReportMonthData" parameterType="cn.xjfd.ssm.pojo.QueryPeriod">
+		SELECT
+			b. NAME AS NAME,
+			stinfo.ID AS id,
+			ROUND(max(measinfo.windspeed), 3) AS max_windspeed,
+			ROUND(avg(measinfo.windspeed), 3) AS avg_windspeed,
+			ROUND(min(measinfo.windspeed), 3) AS min_windspeed,
+			ROUND(max(measinfo.ActPowGri), 3) AS max_P,
+			ROUND(avg(measinfo.ActPowGri), 3) AS avg_P,
+			ROUND(min(measinfo.ActPowGri), 3) AS min_P,
+			ROUND(max(measinfo.RctPowGri), 3) AS max_Q,
+			ROUND(avg(measinfo.RctPowGri), 3) AS avg_Q,
+			ROUND(min(measinfo.RctPowGri), 3) AS min_Q,
+			ROUND(max(measinfo.OutsideTemp), 3) AS max_Temp,
+			ROUND(avg(measinfo.OutsideTemp), 3) AS avg_Temp,
+			ROUND(min(measinfo.OutsideTemp), 3) AS min_Temp,
+			ROUND((max(stinfo.YawMotorLftHour) - min(stinfo.YawMotorLftHour)), 3) AS LftHour,
+			ROUND((max(stinfo.YawMotorRtghHour) - min(stinfo.YawMotorRtghHour)), 3) AS RtghHour,
+			ROUND(((
+				max(stinfo.YawMotorLftHour) - min(stinfo.YawMotorLftHour)
+			) + (
+				max(stinfo.YawMotorRtghHour) - min(stinfo.YawMotorRtghHour)
+			)), 3) AS YawHour,
+			max(stinfo.YawMotorCWCou) - min(stinfo.YawMotorCWCou) AS LftYawMotorCWCou,
+			max(stinfo.YawMotorCCWCou) - min(stinfo.YawMotorCCWCou) AS RtghYawMotorCCWCou,
+			(
+				max(stinfo.YawMotorCWCou) - min(stinfo.YawMotorCWCou)
+			) + (
+				max(stinfo.YawMotorCCWCou) - min(stinfo.YawMotorCCWCou)
+			) AS YawCWCou,
+			ROUND(max(stinfo.ActPowMonthSum), 3) AS monthgenwh,
+			max(stinfo.WinTurStCovCont) - min(stinfo.WinTurStCovCont) AS WinTurStCovCont,
+			max(stinfo.SerModTimes) - min(stinfo.SerModTimes) AS SerModTimes,
+			max(stinfo.WinTurErrCovCont) - min(stinfo.WinTurErrCovCont) AS WinTurErrCovCont,
+			max(stinfo.ConvMaiSwitchCou) - min(stinfo.ConvMaiSwitchCou) AS ConvMaiSwitchCou,
+			max(stinfo.WinHigErrTimes) - min(stinfo.WinHigErrTimes) AS WinHigErrTimes,
+			max(stinfo.WinTurCatInCont) - min(stinfo.WinTurCatInCont) AS WinTurCatInCont,
+			max(stinfo.WinTurArtStpCont) - min(stinfo.WinTurArtStpCont) AS WinTurArtStpCont,
+			ROUND((max(stinfo.CurMonAvlbltRat) * 100), 3) AS MonAvlbltRat,
+			ROUND(min(stinfo.CurMonAvlbltHour), 3) AS MonAvlbltHour,
+			ROUND(max(stinfo.CurMonNormTim), 3) AS MonNormTim,
+			ROUND(max(stinfo.CurMonRunTim), 3) AS MonRunTim,
+			ROUND(max(stinfo.CurMonStopTim), 3) AS MonStopTim,
+			ROUND(max(stinfo.CurMonErrEmeTim), 3) AS MonErrEmeTim,
+			ROUND(max(stinfo.CurMonSerTim), 3) AS MonSerTim,
+			ROUND(max(stinfo.CurMonGridErrTim), 3) AS MonGridErrTim
+		FROM
+			hiswgmeasinfo_#{year} measinfo,
+			hiswgstinfo_#{year} stinfo,
+			bay b,
+			equipment e,
+			generator g
+		WHERE
+			stinfo.CurMonAvlbltHour > 0
+		AND measinfo.ID = stinfo.ID
+		AND b.id = stinfo.ID
+		AND b.id = e.bayid
+		AND e.id = g.id
+		AND DATE_FORMAT(measinfo.savetime, '%Y-%m') = DATE_FORMAT(stinfo.savetime, '%Y-%m')
+		AND DATE_FORMAT(measinfo.savetime, '%Y-%m') = #{startTimeStr}
+		AND g.mgid = 1
+		GROUP BY
+			stinfo.ID
+	</select>
+	
+	
+	
+</mapper>

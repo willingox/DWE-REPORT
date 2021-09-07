@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.xjfd.ssm.dao.ReportMapper">
+
+	<select id="getReport" resultType="cn.xjfd.ssm.pojo.ReportData" parameterType="cn.xjfd.ssm.pojo.QueryPeriod">
+		SELECT
+			b. NAME AS name,
+			h.ID AS id,
+			ROUND(max(h.windspeed), 3) AS maxWindSpeed,
+			ROUND(avg(h.windspeed), 3) AS avgWindSpeed,
+			ROUND(min(h.windspeed), 3) AS minWindSpeed,
+			ROUND(max(h.ActPowGri), 3) AS maxCurp,
+			ROUND(avg(h.ActPowGri), 3) AS avgCurp,
+			ROUND(min(h.ActPowGri), 3) AS minCurp,
+			ROUND((max(h.Reserve1) - min(h.Reserve1)), 3) AS genwh,
+			ROUND((max(h.Reserve2) - min(h.Reserve2)), 3) AS failDowntime
+		FROM
+			hiswgmeasinfo_#{year} h,
+			bay b,
+			equipment e,
+			generator g
+		WHERE
+			b.id = h.ID
+		AND b.id = e.bayid
+		AND e.id = g.id
+		AND h.savetime >= #{startTime}
+		<![CDATA[ AND h.savetime <= #{endTime} ]]>
+		AND g.mgid = 1
+		GROUP BY
+			h.id
+	</select>
+	
+</mapper>

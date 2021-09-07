@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.xjfd.ssm.dao.PowerCurveMapper">
+
+	<select id="getPowerCurveStandard" resultType="cn.xjfd.ssm.pojo.PowerCurveStandard" parameterType="cn.xjfd.ssm.pojo.QueryPeriod">
+		SELECT
+			ge.weatherval AS windvelval,
+			ge.configure AS configure,
+			ge.genpwd AS genpwd,
+			ge.weight AS weight
+		FROM
+			genpwd ge,
+			generator g
+		WHERE
+			ge.genmodelid = g.genmodelid
+		AND g.id = #{id}
+	</select>
+	
+	<select id="getPowerCurveActual" resultType="cn.xjfd.ssm.pojo.PowerCurveActual" parameterType="cn.xjfd.ssm.pojo.QueryPeriod">
+		SELECT
+			floor(hw.WINDVELVAL / 0.5) AS windvelval,
+			avg(hg.curp) AS curp
+		FROM
+			hisweatherdata_#{year} hw,
+			hisgenerator_#{year} hg,
+			genpwd ge,
+			generator g
+		WHERE
+			hw.savetime >= #{startTime}
+		 <![CDATA[ AND hw.savetime < #{endTime} ]]>
+		AND hw.savetime = hg.savetime
+		AND hw.windvelval >= 2
+		 <![CDATA[ AND hw.windvelval < 25 ]]>
+		AND hg.curp > 20
+		AND hg.curcmpstate = 2
+		AND hg.id = hw.equipid
+		AND g.id = hg.id
+		AND g.genmodelid = ge.genmodelid
+		AND ge.WEATHERVAL * 2 = floor(hw.WINDVELVAL / 0.5)
+		AND hg.curp >= ge.genpwd * ge.lowerLimit
+		 <![CDATA[ AND hg.curp <= ge.genpwd * ge.upperlimit ]]>
+		AND hg.id = #{id}
+		GROUP BY
+			floor(hw.WINDVELVAL / 0.5)
+	</select>
+	
+</mapper>

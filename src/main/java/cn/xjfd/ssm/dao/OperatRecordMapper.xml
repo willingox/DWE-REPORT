@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.xjfd.ssm.dao.OperatRecordMapper">
+
+	<select id="getOperatRecord" resultType="OperatRecordData" parameterType="cn.xjfd.ssm.pojo.QueryPeriod">
+		SELECT
+			h.objdesc AS control,
+			h.DESCRIPTION AS operat,
+			DATE_FORMAT(h.thetime, '%Y-%m-%d %k:%i:%s') AS savetime,
+			h.actuser AS operator,
+			b. NAME AS name
+		FROM
+			hisalarm h,
+			control c,
+			bay b
+		WHERE
+			h.thetime >= #{startTime}
+		<![CDATA[ AND h.thetime <= #{endTime} ]]>
+		AND h.objtype = 'control'
+		AND h.alarmid >= 401
+		<![CDATA[ AND h.alarmid <= 414 ]]>
+		AND c.id = h.objid
+		AND c.bayid = b.id
+		AND b.id in
+		<foreach collection="ids" item="id" index="index"
+            open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+	</select>
+
+</mapper>

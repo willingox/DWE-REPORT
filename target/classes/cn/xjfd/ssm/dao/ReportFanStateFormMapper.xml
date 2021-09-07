@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.xjfd.ssm.dao.ReportFanStateFormMapper">
+
+	<select id="getFanSta" resultType="cn.xjfd.ssm.pojo.FanStateData" parameterType="cn.xjfd.ssm.pojo.QueryPeriod">
+		SELECT
+			g. NAME AS NAME,
+			st.description AS plcState,
+			DATE_FORMAT(h.LASTVALTIME, '%Y-%m-%d %k:%i:%s') AS curTime,
+			DATE_FORMAT(h.CURDATATIME, '%Y-%m-%d %k:%i:%s') AS endTime
+		FROM
+			hisstatus_#{year} h,
+			generator g,
+			STATUS s,
+			stvaltype st
+		WHERE
+			h.LASTVALTIME >= #{startTime}
+		<![CDATA[ AND h.lastvaltime <= #{endTime} ]]>
+		AND h.STATUSID = g.standbystid
+		AND h.STATUSID = s.id
+		AND s.meastypeid = st.meastypeid
+		AND h.lastvalue = st.VALUE
+		
+		AND g.id in 
+		<foreach collection="gids" item="gid" index="index"
+            open="(" close=")" separator=",">
+            #{gid}
+        </foreach>
+		ORDER BY
+			g.id
+	</select>
+	
+</mapper>

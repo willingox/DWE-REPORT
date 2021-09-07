@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.xjfd.ssm.dao.GenerationDataMapper">
+
+
+	 
+	 <select id="getGenerationData" resultType="cn.xjfd.ssm.pojo.GenerationPageData" parameterType="cn.xjfd.ssm.pojo.QueryPeriod">
+	 	SELECT nn.id AS id, nn.name AS NAME, nn.totalgenwh AS genwh, mm.hour AS genHour FROM (SELECT
+					g.id AS id,
+					g. NAME AS NAME,
+					(
+						max(h.totalgenwh) - min(h.totalgenwh)
+					) AS totalgenwh
+				FROM
+					hisgenerator_#{year} h,
+					generator g
+				WHERE
+					g.id = h.id
+				AND h.totalgenwh > 0
+				AND h.savetime BETWEEN #{startTime}
+				AND #{endTime}
+				GROUP BY
+					g.id
+			) AS nn
+		INNER JOIN (
+			SELECT
+				e.id,
+				count(*) / 60 AS HOUR
+			FROM
+				generator g,
+				equipment e,
+				hiswgimptinfo_#{year} h
+			WHERE
+				g.id = e.id
+			AND e.bayid = h.id
+			AND h.savetime BETWEEN #{startTime}
+				AND #{endTime}
+			AND h.ActPowGri > 0
+			GROUP BY
+				e.id
+		) AS mm ON nn.id = mm.id
+	 </select>
+	
+	 
+</mapper>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.xjfd.ssm.dao.ReportDayMapper">
+
+	<select id="getReportDay" resultType="cn.xjfd.ssm.pojo.ReportDayData" parameterType="cn.xjfd.ssm.pojo.QueryPeriod">
+		SELECT
+			b. NAME AS NAME,
+			stinfo.ID AS id,
+			ROUND(max(measinfo.windspeed), 3) AS max_windspeed,
+			ROUND(avg(measinfo.windspeed), 3) AS avg_windspeed,
+			ROUND(min(measinfo.windspeed), 3) AS min_windspeed,
+			ROUND(max(measinfo.ActPowGri), 3) AS max_P,
+			ROUND(avg(measinfo.ActPowGri), 3) AS avg_P,
+			ROUND(min(measinfo.ActPowGri), 3) AS min_P,
+			ROUND(max(measinfo.RctPowGri), 3) AS max_Q,
+			ROUND(avg(measinfo.RctPowGri), 3) AS avg_Q,
+			ROUND(min(measinfo.RctPowGri), 3) AS min_Q,
+			ROUND(max(measinfo.OutsideTemp), 3) AS max_Temp,
+			ROUND(avg(measinfo.OutsideTemp), 3) AS avg_Temp,
+			ROUND(min(measinfo.OutsideTemp), 3) AS min_Temp,
+			ROUND(stinfo.YawMotorLftHour, 3) AS LftHour,
+			ROUND(stinfo.YawMotorRtghHour, 3) AS RtghHour,
+			ROUND((stinfo.YawMotorLftHour + stinfo.YawMotorRtghHour), 3) AS YawHour,
+			ROUND(stinfo.YawMotorCWCou, 3) AS LftYawMotorCWCou,
+			ROUND(stinfo.YawMotorCCWCou, 3) AS RtghYawMotorCCWCou,
+			ROUND((stinfo.YawMotorCWCou + stinfo.YawMotorCCWCou), 3) AS YawCWCou,
+			ROUND(stinfo.ActPowDaySum, 3) AS daygenwh,
+			stinfo.WinTurStCovCont AS WinTurStCovCont,
+			stinfo.SerModTimes AS SerModTimes,
+			stinfo.WinTurErrCovCont AS WinTurErrCovCont,
+			stinfo.ConvMaiSwitchCou AS ConvMaiSwitchCou,
+			stinfo.WinHigErrTimes AS WinHigErrTimes,
+			stinfo.WinTurCatInCont AS WinTurCatInCont,
+			stinfo.WinTurArtStpCont AS WinTurArtStpCont
+		FROM
+			hiswgmeasinfo_#{year} measinfo,
+			hiswgstinfo_#{year} stinfo,
+			bay b,
+			equipment e,
+			generator g
+		WHERE
+			measinfo.ID = stinfo.ID
+		AND DATE_FORMAT(
+			measinfo.savetime,
+			'%Y-%m-%d'
+		) = DATE_FORMAT(stinfo.savetime, '%Y-%m-%d')
+		AND b.id = stinfo.ID
+		AND b.id = e.bayid
+		AND e.id = g.id
+		AND DATE_FORMAT(
+			measinfo.savetime,
+			'%Y-%m-%d'
+		) = DATE_FORMAT(#{startTime}, '%Y-%m-%d')
+		AND g.mgid = 1
+		GROUP BY
+			stinfo.ID
+		ORDER BY
+			stinfo.ID
+	</select>
+	
+	<select id="getReportDayYesterday" resultType="cn.xjfd.ssm.pojo.ReportDayData" parameterType="cn.xjfd.ssm.pojo.QueryPeriod">
+		SELECT
+			stinfo.ID AS id,
+			ROUND(stinfo.YawMotorLftHour, 3) AS LftHour,
+			ROUND(stinfo.YawMotorRtghHour, 3) AS RtghHour,
+			ROUND((stinfo.YawMotorLftHour + stinfo.YawMotorRtghHour), 3) AS YawHour,
+			stinfo.YawMotorCWCou AS LftYawMotorCWCou,
+			stinfo.YawMotorCCWCou AS RtghYawMotorCCWCou,
+			stinfo.YawMotorCWCou + stinfo.YawMotorCCWCou AS YawCWCou,
+			stinfo.WinTurStCovCont AS WinTurStCovCont,
+			stinfo.SerModTimes AS SerModTimes,
+			stinfo.WinTurErrCovCont AS WinTurErrCovCont,
+			stinfo.ConvMaiSwitchCou AS ConvMaiSwitchCou,
+			stinfo.WinHigErrTimes AS WinHigErrTimes,
+			stinfo.WinTurCatInCont AS WinTurCatInCont,
+			stinfo.WinTurArtStpCont AS WinTurArtStpCont
+		FROM
+			hiswgstinfo_#{year} stinfo,
+			equipment e,
+			generator g
+		WHERE
+			DATE_FORMAT(stinfo.savetime, '%Y-%m-%d') = DATE_FORMAT(#{startTime}, '%Y-%m-%d')
+		AND stinfo.id = e.bayid
+		AND e.id = g.id
+		AND g.mgid = 1
+		ORDER BY
+			stinfo.ID
+	</select>
+	
+</mapper>

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.xjfd.ssm.dao.AvailabilityMapper">
+
+	<select id="getFailDownData_OccurredNotReturned" resultType="Integer" parameterType="cn.xjfd.ssm.pojo.QueryPeriod">
+		SELECT
+			COUNT(*)
+		FROM
+			hisstatus_#{year} h,
+			STATUS s,
+			equipment e,
+			stvaltype st
+		WHERE
+			h.statusid = s.id
+		AND s.meastypeid = st.meastypeid
+		AND (
+			st.meastypeid = 20811
+			OR st.meastypeid = 20874
+		)
+		AND s.equipid = e.id
+		AND h.lastvalue = st.VALUE
+		<![CDATA[ AND h.lastvaltime < #{startTime} ]]>
+		AND h.curdatatime > #{endTime}
+		AND st.statetype = 5
+		AND (e.bayid = #{id})
+		ORDER BY
+			e.id
+	</select>
+	
+	<select id="getFailDownData_OccurredAndReturned" resultType="cn.xjfd.ssm.pojo.FailDownData" parameterType="cn.xjfd.ssm.pojo.QueryPeriod">
+		SELECT
+			h.lastvaltime AS happenTime,
+			h.curdatatime AS removeTime,
+			s. NAME AS name,
+			s.id AS sid,
+			st. NAME AS curcmpState,
+			e. NAME AS windName,
+			e.id AS equipId,
+			e.bayid AS id
+		FROM
+			hisstatus_#{year} h,
+			STATUS s,
+			equipment e,
+			stvaltype st
+		WHERE
+			h.statusid = s.id
+		AND s.meastypeid = st.meastypeid
+		AND (
+			st.meastypeid = 20811
+			OR st.meastypeid = 20874
+		)
+		AND s.equipid = e.id
+		AND h.lastvalue = st.VALUE
+		<![CDATA[ AND h.lastvaltime < #{startTime} ]]>
+		AND h.curdatatime >= #{startTime}
+		<![CDATA[ AND h.curdatatime <= #{endTime} ]]>
+		AND st.statetype = 5
+		AND (e.bayid = #{id})
+		ORDER BY
+			e.id
+	</select>
+	
+	<select id="getFailDownData_NotOccurredAndReturned" resultType="cn.xjfd.ssm.pojo.FailDownData" parameterType="cn.xjfd.ssm.pojo.QueryPeriod">
+		SELECT
+			h.lastvaltime AS happenTime,
+			h.curdatatime AS removeTime,
+			s. NAME AS name,
+			s.id AS sid,
+			st. NAME AS curcmpState,
+			e. NAME AS windName,
+			e.id AS equipId,
+			e.bayid AS id
+		FROM
+			hisstatus_#{year} h,
+			STATUS s,
+			equipment e,
+			stvaltype st
+		WHERE
+			h.statusid = s.id
+		AND s.meastypeid = st.meastypeid
+		AND (
+			st.meastypeid = 20811
+			OR st.meastypeid = 20874
+		)
+		AND s.equipid = e.id
+		AND h.lastvalue = st.VALUE
+		AND h.lastvaltime >= #{startTime}
+		<![CDATA[ AND h.lastvaltime <= #{endTime} ]]>
+		AND h.curdatatime >= #{startTime}
+		<![CDATA[ AND h.curdatatime <= #{endTime} ]]>
+		AND st.statetype = 5
+		AND (e.bayid = #{id})
+		ORDER BY
+			e.id
+	</select>
+	
+	<select id="getFailDownData_NotOccurredNotReturned" resultType="cn.xjfd.ssm.pojo.FailDownData" parameterType="cn.xjfd.ssm.pojo.QueryPeriod">
+		SELECT
+			h.lastvaltime AS happenTime,
+			h.curdatatime AS removeTime,
+			s. NAME AS name,
+			s.id AS sid,
+			st. NAME AS curcmpState,
+			e. NAME AS windName,
+			e.id AS equipId,
+			e.bayid AS id
+		FROM
+			hisstatus_#{year} h,
+			STATUS s,
+			equipment e,
+			stvaltype st
+		WHERE
+			h.statusid = s.id
+		AND s.meastypeid = st.meastypeid
+		AND (
+			st.meastypeid = 20811
+			OR st.meastypeid = 20874
+		)
+		AND s.equipid = e.id
+		AND h.lastvalue = st.VALUE
+		AND h.lastvaltime >= #{startTime}
+		<![CDATA[ AND h.lastvaltime <= #{endTime} ]]>
+		AND h.curdatatime > #{endTime}
+		AND st.statetype = 5
+		AND (e.bayid = #{id})
+		ORDER BY
+			e.id
+	</select>
+	
+</mapper>

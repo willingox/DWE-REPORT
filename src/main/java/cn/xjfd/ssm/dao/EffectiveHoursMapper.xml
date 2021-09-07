@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.xjfd.ssm.dao.EffectiveHoursMapper">
+
+	<select id="getEffectiveHours" resultType="cn.xjfd.ssm.pojo.EffectiveHoursData" parameterType="cn.xjfd.ssm.pojo.QueryPeriod">
+		SELECT
+			e.bayid AS id,
+			(
+				(
+					max(h.totalgenwh) - min(h.totalgenwh)
+				) * 1000
+			) / g.capacity AS effectiveHours,
+			g. NAME AS name,
+			max(h.totalgenwh) - min(h.totalgenwh) AS genwh,
+			g.capacity AS capacity
+		FROM
+			hisgenerator_#{year} h,
+			generator g,
+			equipment e
+		WHERE
+			h.savetime >= #{startTime}
+		<![CDATA[ AND h.savetime <= #{endTime} ]]>
+		AND h.id = g.id
+		and g.ID = e.id
+		AND h.totalgenwh > 0
+		AND (e.bayid = #{id})
+		GROUP BY
+			h.id
+	</select>
+
+</mapper>

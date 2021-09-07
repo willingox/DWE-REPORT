@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.xjfd.ssm.dao.WindRoseMapper">
+
+	<select id="getWindRoseData" resultType="cn.xjfd.ssm.pojo.WindRoseData" parameterType="cn.xjfd.ssm.pojo.QueryPeriod">
+		SELECT
+			count(*) AS frequency,
+			floor(qwer.winddirval / 22.5) AS windDirectionId,
+			TRUNCATE (avg(qwer.windvelval), 2) AS avgWindSpeed,
+			TRUNCATE (avg(qwer.curp), 2) AS avgPower
+		FROM
+			(
+				SELECT
+					(
+						CASE
+						WHEN hw.winddirval >= 348.75 THEN
+							hw.winddirval - 326.25
+						ELSE
+							hw.winddirval + 33.75
+						END
+					) AS winddirval,
+					hw.windvelval,
+					hg.curp
+				FROM
+					hisweatherdata_#{year} hw,
+					hisgenerator_#{year} hg
+				WHERE
+					hw.winddirval >= 0
+				<![CDATA[ AND hw.winddirval <= 360 ]]>
+				AND hw.equipid = hg.id
+				AND hw.equipid = #{gid}
+				AND hw.savetime = hg.savetime
+				AND hw.savetime >= #{startTime}
+				<![CDATA[ AND hw.savetime <= #{endTime} ]]>
+			) AS qwer
+		GROUP BY
+			floor(qwer.winddirval / 22.5)
+	</select>
+
+</mapper>

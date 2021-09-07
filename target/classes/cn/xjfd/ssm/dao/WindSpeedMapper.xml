@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.xjfd.ssm.dao.WindSpeedMapper">
+
+	<select id="getWindSpeed" resultType="WindSpeedData" parameterType="cn.xjfd.ssm.pojo.QueryPeriod">
+		SELECT
+			max.id as gid,
+			AVG.name as name,
+			DATE_FORMAT(max.maxTime, '%Y-%m-%d %k:%i:%s') as maxTime,
+			max.maxWind as maxWind,
+			DATE_FORMAT(min.minTime, '%Y-%m-%d %k:%i:%s') as minTime,
+			min.minWind as minWind,
+			AVG.windvelval as avgWind
+		FROM
+		(
+			SELECT
+				equipid AS id,
+				SAVETIME AS maxTime,
+				windvelval AS maxWind
+			FROM
+				hisweatherdata_#{year}
+			WHERE
+				windvelval = (
+					SELECT
+						max(windvelval)
+					FROM
+						hisweatherdata_#{year}
+					WHERE
+						savetime >= #{startTime}
+					<![CDATA[ AND savetime <= #{endTime} ]]>
+					AND equipid = #{gid}
+				)
+			AND savetime >= #{startTime}
+			<![CDATA[ AND savetime <= #{endTime} ]]>
+			
+			AND equipid = #{gid}
+			LIMIT 1
+		) max,
+		(
+			SELECT
+				equipid AS id,
+				SAVETIME AS minTime,
+				windvelval AS minWind
+			FROM
+				hisweatherdata_#{year}
+			WHERE
+				windvelval = (
+					SELECT
+						min(windvelval)
+					FROM
+						hisweatherdata_#{year}
+					WHERE
+						savetime >= #{startTime}
+					and windvelval >= 0
+					<![CDATA[ AND savetime <= #{endTime} ]]>
+					AND equipid = #{gid}
+				)
+			AND savetime >= #{startTime}
+			<![CDATA[ AND savetime <= #{endTime} ]]>
+			AND equipid = #{gid}
+			LIMIT 1
+		) min,
+		(
+			SELECT
+				avg(h.windvelval) AS windvelval,
+				h.equipid as  id,
+				g.name as name
+			FROM
+				hisweatherdata_#{year} h,
+				generator g
+			WHERE
+				h.savetime >= #{startTime}
+			<![CDATA[ AND savetime <= #{endTime} ]]>
+			AND h.equipid != 0
+			AND h.equipid = g.id
+			AND h.equipid = #{gid}
+			GROUP BY
+				h.equipid
+			ORDER BY
+				h.equipid
+		) AVG
+		WHERE
+			min.id = max.id
+		and
+			min.id = AVG.id
+	</select>
+
+</mapper>

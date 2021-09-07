@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.xjfd.ssm.dao.ReportLossEleMapper">
+	<select id="getReportLossEle" resultType="cn.xjfd.ssm.pojo.ReportLossEleData"
+		parameterType="cn.xjfd.ssm.pojo.QueryPeriod">
+		SELECT e.name as name,
+		max(h.gridErrStopHour)-min(h.gridErrStopHour)
+		as gridErrStopHour,
+		max(h.weaErrStopHour)-min(h.weaErrStopHour) as
+		weaErrStopHour ,
+		max(h.hMIStopHour)-min(h.hMIStopHour) as hMIStopHour,
+		max(h.remoteStopHour)-min(h.remoteStopHour) as remoteStopHour,
+		max(h.errBreakHour)-min(h.errBreakHour) as errBreakHour,
+		max(h.powLimHour)-min(h.powLimHour) as powLimHour,
+		max(h.gridErrPowSum)-min(h.gridErrPowSum) as gridErrPowSum,
+		max(h.weaErrPowSum)-min(h.weaErrPowSum) as weaErrPowSum,
+		max(h.hMIStopPowSum)-min(h.hMIStopPowSum) as hMIStopPowSum,
+		max(h.remoteStopPowSum)-min(h.remoteStopPowSum) as remoteStopPowSum,
+		max(h.errBreakPowSum)-min(h.errBreakPowSum) as errBreakPowSum,
+		max(h.powLimPowSum)-min(h.powLimPowSum) as powLimPowSum,
+		max(h.hiddenPow)-min(h.hiddenPow) as hiddenPow,
+		(max(h.Reserve1)-min(h.Reserve1))/(max(h.hiddenPow)-min(h.hiddenPow))
+		as capAva,
+		(max(h.hiddenPow)-min(h.hiddenPow))/g.CAPACITY as avaHours,
+		((max(h.gridErrStopHour)-min(h.gridErrStopHour))+(max(h.weaErrStopHour)-min(h.weaErrStopHour))+(max(h.hMIStopHour)-min(h.hMIStopHour))+(max(h.remoteStopHour)-min(h.remoteStopHour))+(max(h.errBreakHour)-min(h.errBreakHour))+(max(h.powLimHour)-min(h.powLimHour)))
+		as hoursSum,
+		((max(h.gridErrPowSum)-min(h.gridErrPowSum))+(max(h.weaErrPowSum)-min(h.weaErrPowSum))+(max(h.hMIStopPowSum)-min(h.hMIStopPowSum))+(max(h.remoteStopPowSum)-min(h.remoteStopPowSum))+(max(h.errBreakPowSum)-min(h.errBreakPowSum))+(max(h.powLimPowSum)-min(h.powLimPowSum)))
+		as lossGenSum
+		FROM hiswgmeasinfo_#{year} h,equipment e,generator g
+		WHERE h.savetime >= #{startTime}
+		<![CDATA[ AND h.savetime <= #{endTime} ]]>
+		AND
+		e.bayid=h.ID AND e.id=g.ID
+		AND g.id in
+		<foreach collection="gids" item="gid" index="index" open="("
+			close=")" separator=",">
+			#{gid}
+		</foreach>
+		GROUP BY h.ID
+	</select>
+</mapper>

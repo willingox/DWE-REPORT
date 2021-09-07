@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.xjfd.ssm.dao.GetOneMinColumnMapper">
+
+	<select id="getOneMinColumn" resultType="cn.xjfd.ssm.pojo.ColumnData">
+		SELECT
+			columndes,
+			columnname
+		FROM
+			bussclmncfg
+		WHERE
+			webshowflag = 1
+		and
+			busstblcfgid = 1
+	</select>
+	
+	<select id="getTenMinColumn" resultType="cn.xjfd.ssm.pojo.ColumnData">
+		SELECT
+			columndes,
+			columnname
+		FROM
+			bussclmncfg
+		WHERE
+			webshowflag = 1
+		and
+			busstblcfgid = 2
+	</select>
+	
+	<select id="getOneDayColumn" resultType="cn.xjfd.ssm.pojo.ColumnData">
+		SELECT
+			columndes,
+			columnname
+		FROM
+			bussclmncfg
+		WHERE
+			webshowflag = 1
+		and
+			busstblcfgid = 3
+	</select>
+
+	
+</mapper>

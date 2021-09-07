@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.xjfd.ssm.dao.FailureNumberMapper">
+
+	<select id="getFailureNumber" resultType="FailureNumberData" parameterType="cn.xjfd.ssm.pojo.QueryPeriod">
+		SELECT
+			b.id as id,
+			b.name as name,
+			count(*) as failureNumber
+		FROM
+			bay b,
+			hisstatus_#{year} h,
+			STATUS s,
+			equipment e,
+			stvaltype st
+		WHERE
+			h.statusid = s.id
+		AND s.meastypeid = st.meastypeid
+		AND (
+			st.meastypeid = 20811
+			OR st.meastypeid = 20874
+		)
+		AND s.equipid = e.id
+		AND h.lastvalue = st.VALUE
+		<![CDATA[ AND h.lastvaltime <= #{endTime} ]]>
+		AND h.lastvaltime >= #{startTime}
+		AND st.statetype = 5
+		AND e.bayid = #{id}
+		and b.id = e.bayid
+		and e.equipclassid = 2
+	</select>
+
+</mapper>

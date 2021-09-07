@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.xjfd.ssm.dao.ReportYearMapper">
+
+	<select id="getReportYear" resultType="cn.xjfd.ssm.pojo.ReportYearData" parameterType="cn.xjfd.ssm.pojo.QueryPeriod">
+		SELECT
+			b. NAME AS NAME,
+			stinfo.ID AS id,
+			ROUND(max(measinfo.windspeed), 3) AS max_windspeed,
+			ROUND(avg(measinfo.windspeed), 3) AS avg_windspeed,
+			ROUND(min(measinfo.windspeed), 3) AS min_windspeed,
+			ROUND(max(measinfo.ActPowGri), 3) AS max_P,
+			ROUND(avg(measinfo.ActPowGri), 3) AS avg_P,
+			ROUND(min(measinfo.ActPowGri), 3) AS min_P,
+			ROUND(max(measinfo.RctPowGri), 3) AS max_Q,
+			ROUND(avg(measinfo.RctPowGri), 3) AS avg_Q,
+			ROUND(min(measinfo.RctPowGri), 3) AS min_Q,
+			ROUND(max(measinfo.OutsideTemp), 3) AS max_Temp,
+			ROUND(avg(measinfo.OutsideTemp), 3) AS avg_Temp,
+			ROUND(min(measinfo.OutsideTemp), 3) AS min_Temp,
+			ROUND(max(stinfo.YawMotorLftHour), 3) AS LftHour,
+			ROUND(max(stinfo.YawMotorRtghHour), 3) AS RtghHour,
+			ROUND(max(
+				stinfo.YawMotorLftHour + stinfo.YawMotorRtghHour
+			), 3) AS YawHour,
+			max(stinfo.YawMotorCWCou) AS LftYawMotorCWCou,
+			max(stinfo.YawMotorCCWCou) AS RtghYawMotorCCWCou,
+			max(
+				stinfo.YawMotorCWCou + stinfo.YawMotorCCWCou
+			) AS YawCWCou,
+			ROUND(max(stinfo.ActPowYearSum), 3) AS yeargenwh,
+			max(stinfo.WinTurStCovCont) AS WinTurStCovCont,
+			max(stinfo.SerModTimes) AS SerModTimes,
+			max(stinfo.WinTurErrCovCont) AS WinTurErrCovCont,
+			max(stinfo.ConvMaiSwitchCou) AS ConvMaiSwitchCou,
+			max(stinfo.WinHigErrTimes) AS WinHigErrTimes,
+			max(stinfo.WinTurCatInCont) AS WinTurCatInCont,
+			max(stinfo.WinTurArtStpCont) AS WinTurArtStpCont,
+			ROUND((max(stinfo.CurYeaAvlbltRat) * 100), 3) AS YeaAvlbltRat
+		FROM
+			hiswgmeasinfo_#{year} measinfo,
+			hiswgstinfo_#{year} stinfo,
+			bay b,
+			equipment e,
+			generator g
+		WHERE
+			measinfo.ID = stinfo.ID
+		AND b.id = stinfo.ID
+		AND b.id = e.bayid
+		AND e.id = g.id
+		AND g.mgid = 1
+		GROUP BY
+			stinfo.ID
+	</select>
+	
+	
+	
+</mapper>

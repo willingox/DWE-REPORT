@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.xjfd.ssm.dao.FullMaxPowerDataMapper">
+
+	<select id="getFullMaxPowerData" resultType="cn.xjfd.ssm.pojo.FullMaxPowerData" parameterType="cn.xjfd.ssm.pojo.QueryPeriod">
+		SELECT
+			h.savetime AS fullmaxCurpTime,
+			h.ActPowGri AS fullmaxCurp,
+			h.WindSpeed AS fullmaxCurpWind
+		FROM
+			(
+				SELECT
+					savetime,
+					sum(ActPowGri) AS ActPowGri,
+					max(WindSpeed) AS WindSpeed
+				FROM
+					hiswgimptinfo_#{year}
+				WHERE
+					savetime >= #{startTime}
+				<![CDATA[ AND savetime <= #{endTime} ]]>
+				
+				GROUP BY
+					savetime
+			) h
+		WHERE
+			h.ActPowGri = (
+				SELECT
+					max(h.ActPowGri)
+				FROM
+					(
+						SELECT
+							savetime,
+							sum(ActPowGri) AS ActPowGri
+						FROM
+							hiswgimptinfo_#{year}
+						WHERE
+							savetime >= #{startTime}
+						<![CDATA[ AND savetime <= #{endTime} ]]>
+						
+						GROUP BY
+							savetime
+					) h
+			)
+	</select>
+	
+	<select id="getFullMaxPowerSingleData" resultType="cn.xjfd.ssm.pojo.FullMaxPowerSingleData" parameterType="cn.xjfd.ssm.pojo.QueryPeriod">
+		SELECT
+			b. NAME AS name,
+			h.ActPowGri AS curp,
+			DATE_FORMAT(h.SAVETIME, '%Y-%m-%d %k:%i:%s') AS savetime,
+			h.WindSpeed AS windSpeed
+		FROM
+			hiswgimptinfo_#{year} h,
+			bay b
+		WHERE
+			h.id = b.id
+		AND h.SAVETIME = #{savetime}
+	</select>
+	
+</mapper>

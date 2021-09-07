@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.xjfd.ssm.dao.SingleMaxPowerDataMapper">
+
+	<select id="getWindId" resultType="Integer">
+		SELECT
+		e.bayid AS id
+		FROM
+		generator g,
+		equipment e
+		WHERE
+		g.ID = e.id
+	</select>
+	
+	<select id="getSMaxPowerData" resultType="cn.xjfd.ssm.pojo.SingleMaxPowerData" parameterType="cn.xjfd.ssm.pojo.QueryPeriod">
+		SELECT
+			h.id as id,
+			max(ActPowGri) AS maxCurp,
+			b. NAME AS name,
+			DATE_FORMAT((
+				SELECT
+					SAVETIME
+				FROM
+					hiswgimptinfo_#{year}
+				WHERE
+					ActPowGri = (
+						SELECT
+							max(ActPowGri)
+						FROM
+							hiswgimptinfo_#{year}
+						WHERE
+							savetime >= #{startTime}
+							<![CDATA[ AND savetime <= #{endTime} ]]>
+						AND id = #{id}
+					)
+				AND savetime >= #{startTime}
+				<![CDATA[ AND savetime <= #{endTime} ]]>
+				LIMIT 1
+			), '%Y-%m-%d %k:%i:%s') AS maxTime,
+			(
+				SELECT
+					WindSpeed
+				FROM
+					hiswgimptinfo_#{year}
+				WHERE
+					ActPowGri = (
+						SELECT
+							max(ActPowGri)
+						FROM
+							hiswgimptinfo_#{year}
+						WHERE
+							savetime >= #{startTime}
+						    <![CDATA[ AND savetime <= #{endTime} ]]>
+						AND id = #{id}
+					)
+				LIMIT 1
+			) AS maxWind
+		FROM
+			hiswgimptinfo_#{year} h,
+			bay b
+		WHERE
+			h.savetime >= #{startTime}
+			<![CDATA[ AND h.savetime <= #{endTime} ]]>
+		AND h.id = b.id
+		AND h.id = #{id}
+	</select>
+	
+	
+	
+</mapper>

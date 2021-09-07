@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.xjfd.ssm.dao.EquipmentFailureMapper">
+
+	<select id="getEquipmentFailure" resultType="EquipmentFailureData" parameterType="cn.xjfd.ssm.pojo.QueryPeriod">
+		SELECT
+		DATE_FORMAT(h.lastvaltime, '%Y-%m-%d %k:%i:%s') AS happenTime,
+		DATE_FORMAT(h.curdatatime, '%Y-%m-%d %k:%i:%s') AS removeTime,
+			s. NAME AS failName,
+<!-- 			s.id AS id, -->
+			st. NAME AS curcmpState,
+			e. NAME AS name,
+			e.id AS gid
+		FROM
+			hisstatus_#{year} h,
+			STATUS s,
+			equipment e,
+			stvaltype st
+		WHERE
+			h.statusid = s.id
+		AND s.meastypeid = st.meastypeid
+		AND st.meastypeid != 20811
+		AND s.equipid = e.id
+		AND h.lastvalue = st.VALUE
+		AND h.lastvaltime >= #{startTime}
+		<![CDATA[ AND h.lastvaltime <= #{endTime} ]]>
+		AND st.statetype in 
+		<foreach collection="queryType" item="type" index="index"
+            open="(" close=")" separator=",">
+            #{type}
+        </foreach>
+		AND s. NAME LIKE '%${keywords}%'
+		AND e.id in
+		<foreach collection="gids" item="gid" index="index"
+            open="(" close=")" separator=",">
+            #{gid}
+        </foreach>
+		ORDER BY
+			e.id,
+			h.lastvaltime
+	</select>
+
+</mapper>

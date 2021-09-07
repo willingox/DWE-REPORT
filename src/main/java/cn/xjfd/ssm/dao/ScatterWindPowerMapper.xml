@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.xjfd.ssm.dao.ScatterWindPowerMapper">
+
+	<select id="getScatterWindPower" resultType="ScatterWindPowerData" parameterType="cn.xjfd.ssm.pojo.QueryPeriod">
+		select 
+			g.name as name,
+			ROUND(h1.WINDVELVAL, 3) as wind, 
+			ROUND(g1.curp, 3) as power   
+		from 
+			hisweatherdata_#{year} h1, 
+			hisgenerator_#{year} g1 ,
+			genpwd ge,generator g 
+		where   
+			g1.curcmpstate = 2 
+		and h1.equipid=g1.id 
+		and g.id=g1.id 
+		and ge.WEATHERVAL*2=floor(h1.WINDVELVAL/0.5) 
+		and g.genmodelid=ge.genmodelid 
+		and g1.curp>=ge.genpwd*ge.lowerLimits 
+		<![CDATA[ AND g1.curp<=ge.genpwd*ge.upperlimits ]]>
+		and h1.equipid=#{gid} 
+		and h1.savetime=g1.savetime 
+		and h1.savetime >= #{startTime}
+		<![CDATA[ AND h1.savetime <= #{endTime} ]]>
+<!-- 		ORDER BY -->
+<!-- 				h1.WINDVELVAL -->
+	</select>
+
+</mapper>

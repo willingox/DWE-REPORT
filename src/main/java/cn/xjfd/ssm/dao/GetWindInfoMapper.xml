@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.xjfd.ssm.dao.GetWindInfoMapper">
+
+	<select id="getWindInfo" resultType="cn.xjfd.ssm.pojo.WindInfo">
+		SELECT
+			e.bayid AS id,
+			g.name as name,
+			g.id as gid
+		FROM
+			generator g,
+			equipment e
+		WHERE
+			g.ID = e.id
+	</select>
+	
+	<select id="getWindInfoById" resultType="cn.xjfd.ssm.pojo.WindInfo" parameterType="Integer">
+		SELECT
+			e.bayid AS id,
+			g.name as name,
+			g.id as gid
+		FROM
+			generator g,
+			equipment e
+		WHERE
+			g.ID = e.id
+		AND
+			e.bayid = #{id}
+	</select>
+	
+</mapper>
